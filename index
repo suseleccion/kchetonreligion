@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Interactiva - Religión 6°</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #50E3C2;
+            --danger: #E94E77;
+            --success: #27AE60;
+            --bg: #F4F7F6;
+            --text: #333;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Pantallas */
+        .screen {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pantalla de Inicio */
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .start-screen p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .rules-box {
+            background: #f8f9fa;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .rules-box ul {
+            list-style-type: none;
+        }
+
+        .rules-box li {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .rules-box li::before {
+            content: '📌';
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn:hover {
+            background: #357ABD;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        /* Encabezado del Quiz */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #eee;
+            height: 10px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* Grid de 2 columnas para 8 opciones */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: #e6f0ff;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: var(--success);
+            color: #155724;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: var(--danger);
+            color: #721c24;
+        }
+
+        .option-letter {
+            background: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 12px;
+            border: 2px solid #dee2e6;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        .option.selected .option-letter {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #d4edda;
+            color: var(--success);
+            border-left: 5px solid var(--success);
+        }
+
+        .feedback.error {
+            background: #f8d7da;
+            color: var(--danger);
+            border-left: 5px solid var(--danger);
+        }
+
+        .btn-next {
+            margin-top: 20px;
+            float: right;
+            display: none;
+        }
+
+        .btn-next.show {
+            display: inline-block;
+        }
+
+        /* Pantalla de Resultados */
+        .result-screen {
+            text-align: center;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .result-score {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-restart {
+            background: var(--secondary);
+            box-shadow: 0 5px 15px rgba(80, 227, 194, 0.3);
+        }
+
+        .btn-restart:hover {
+            background: #3bc9a9;
+            box-shadow: 0 7px 20px rgba(80, 227, 194, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr; /* 1 columna en móviles */
+            }
+            .screen { padding: 20px; }
+            .start-screen h1 { font-size: 1.8rem; }
+            .question-text { font-size: 1.1rem; }
+            .option { padding: 12px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Pantalla de Inicio -->
+    <div id="start-screen" class="screen active start-screen">
+        <h1>Evaluación de Religión</h1>
+        <p>Demuestra cuánto has aprendido sobre las relaciones de Jesús, sus rasgos, el proyecto de Dios y la Virgen María.</p>
+        
+        <div class="rules-box">
+            <ul>
+                <li>La prueba consta de <strong>10 preguntas</strong> aleatorias.</li>
+                <li>Cada pregunta tiene <strong>8 opciones</strong> de respuesta (¡lee con cuidado!).</li>
+                <li>Necesitas <strong>9 respuestas correctas</strong> para aprobar (pierdes con 2 fallos).</li>
+                <li>Solo tienes <strong>una oportunidad</strong> por pregunta.</li>
+            </ul>
+        </div>
+
+        <button class="btn" onclick="startQuiz()">Comenzar Evaluación</button>
+    </div>
+
+    <!-- Pantalla del Quiz -->
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="question-counter" style="font-weight: 600; color: var(--primary);">Pregunta 1 de 10</span>
+            <span id="score-display" style="font-weight: 600;">Aciertos: 0 | Fallos: 0</span>
+        </div>
+        
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div id="question-text" class="question-text">Cargando pregunta...</div>
+        
+        <div id="options-container" class="options-container">
+            <!-- Las 8 opciones se generan dinámicamente -->
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        
+        <button id="btn-next" class="btn btn-next" onclick="nextQuestion()">Siguiente Pregunta</button>
+        <div style="clear: both;"></div>
+    </div>
+
+    <!-- Pantalla de Resultados -->
+    <div id="result-screen" class="screen result-screen">
+        <div id="result-icon" class="result-icon">🎉</div>
+        <h2 id="result-title" class="result-title">¡Felicidades!</h2>
+        <p id="result-score" class="result-score">Has acertado 10 de 10 preguntas.</p>
+        <p id="result-message" style="margin-bottom: 30px; color: #666;"></p>
+        <button class="btn btn-restart" onclick="location.reload()">Volver a Intentar</button>
+    </div>
+</div>
+
+<script>
+    // BANCO DE PREGUNTAS AMPLIADO (16 preguntas, cada una con 8 opciones)
+    // Las respuestas incorrectas tienen longitud y tono similar a la correcta.
+    const questionBank = [
+        // TEMA 1: Relaciones de Jesús con las personas de su tiempo
+        {
+            question: "¿Cuál era el enfoque principal de las relaciones de Jesús con las personas de su tiempo?",
+            options: [
+                "Una empatía radical que priorizaba la necesidad y la dignidad intrínseca de las personas por encima de su estatus o moralidad pasada.",
+                "Una estricta observancia de la ley de pureza ritual que determinaba quién era digno de ser escuchado y quién no.",
+                "Un enfoque político y revolucionario que buscaba derrocar al Imperio Romano mediante la fuerza y la confrontación directa.",
+                "Una separación radical de los pecadores públicos para mantener la santidad del grupo de sus seguidores más cercanos.",
+                "Una crítica constante a las autoridades religiosas, buscando reformar el templo y sus prácticas de comercio interno.",
+                "Un liderazgo basado en la predicación exclusiva a las élites sociales y económicas de la Palestina del siglo I.",
+                "Una estrategia de aislamiento voluntario en el desierto para preparar a sus discípulos para el fin de los tiempos.",
+                "Un enfoque pedagógico basado en la repetición de la ley mosaica y el cumplimiento estricto de las tradiciones orales."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Cómo transformó Jesús el trato hacia las mujeres en la sociedad patriarcal del siglo I?",
+            options: [
+                "Las integró en su grupo, las defendió públicamente y las eligió como testigos clave de su resurrección.",
+                "Les permitió seguirlo solo en privado, pero les prohibió hablar en público o dar testimonio de sus milagros.",
+                "Las incluyó en su grupo, pero mantuvo la norma de que su testimonio no tuviera validez legal en los tribunales.",
+                "Las defendió de las acusaciones, pero les exigió que se mantuvieran al margen de las decisiones de la comunidad.",
+                "Les encargó la administración de los bienes del grupo, pero les negó la posibilidad de aprender las escrituras.",
+                "Las nombró líderes de las sinagogas locales, desafiando directamente la autoridad de los fariseos y saduceos.",
+                "Les permitió participar en las comidas públicas, pero no en las enseñanzas privadas que daba a sus apóstoles.",
+                "Las utilizó como ejemplo de fe en sus parábolas, pero sin permitirles formar parte activa de su ministerio."
+            ],
+            correct: 0
+        },
+        {
+            question: "Según el texto, ¿qué caracteriza a las 'relaciones utilitaristas' en la actualidad?",
+            options: [
+                "Aquellas donde las personas aparentan tratar bien a los demás pero buscando una utilidad concreta o un interés de provecho personal.",
+                "Aquellas donde se reconoce al otro como persona igual en dignidad y se busca el crecimiento mutuo y sincero.",
+                "Aquellas que dependen del estado de ánimo del momento, siendo amables en el buen ánimo y ogros en la tristeza.",
+                "Aquellas donde se trata a las personas porque las circunstancias sociales lo exigen, pero sin un interés real por ellas.",
+                "Aquellas que buscan mantener una buena imagen con los obreros para aumentar la productividad y el rendimiento.",
+                "Aquellas donde el único objetivo es aparecer como el centro de atención y presumir de los logros personales.",
+                "Aquellas que se basan en la reciprocidad, donde se ayuda al otro esperando recibir exactamente lo mismo a cambio.",
+                "Aquellas que surgen de la necesidad de pertenecer a un grupo social, imitando sus costumbres y comportamientos."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Cuál de las siguientes opciones describe mejor las 'relaciones de alteridad'?",
+            options: [
+                "Relaciones sinceras que reconocen al otro como persona igual en dignidad, con los mismos derechos y deberes.",
+                "Relaciones donde se busca aparecer como el centro de todo, utilizando a los demás para presumir y aparentar.",
+                "Relaciones que buscan mantener una buena imagen con los obreros para aumentar la productividad y el rendimiento.",
+                "Relaciones que se basan en el estado de ánimo, donde la amistad depende de si estamos tristes o contentos.",
+                "Relaciones que se establecen por conveniencia social, donde se trata a las personas solo porque las circunstancias lo exigen.",
+                "Relaciones que buscan un beneficio económico mutuo, donde ambas partes obtienen una ventaja material concreta.",
+                "Relaciones que se fundamentan en la superioridad de uno sobre otro, buscando siempre la dominación y el control.",
+                "Relaciones que surgen de la empatía, pero que se limitan a un trato superficial y sin compromiso real a largo plazo."
+            ],
+            correct: 0
+        },
+
+        // TEMA 2: Rasgos de Jesús
+        {
+            question: "¿Qué rasgo de la personalidad de Jesús destaca su capacidad para decir la verdad sin hipocresía?",
+            options: [
+                "Un hombre extraordinariamente sincero y audazmente libre, dominado por una absoluta exigencia de autenticidad.",
+                "Un hombre profundamente vitalista y feliz, que amaba intensamente la vida y no soportaba el dolor de la gente.",
+                "Un hombre para-los-demás, sencillo y servicial, con una grandeza de espíritu y una entrega total durante toda su vida.",
+                "Un hombre abierto a la trascendencia y enraizado en ella, con una orientación radical hacia Dios a quien llama ABBA.",
+                "Un hombre auténtico y abierto a la verdad, profundamente humano y muy exigente con los principios éticos fundamentales.",
+                "Un hombre inserto en la vida de su pueblo, con un talante especial para relacionarse con sus semejantes.",
+                "Un hombre que amaba la vida y se alegraba en las fiestas, compartiendo la amistad en una comida con sus discípulos.",
+                "Un hombre con una grandeza impresionante, cuya forma de hablar arrastraba a las masas y atraía seguidores."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Qué actitud de Jesús refleja su 'talante muy especial para relacionarse con sus semejantes'?",
+            options: [
+                "Compasivo y cercano, solidario y fraternal, inserto en la vida de su pueblo y atento a sus necesidades.",
+                "Auténtico y abierto a la verdad, profundamente humano y muy exigente con los principios éticos fundamentales.",
+                "Sincero y audazmente libre, aborreciendo la hipocresía y la ostentación, así como la doble vida y el doble mensaje.",
+                "Vitalista y feliz, que amaba intensamente la vida, se alegraba en las fiestas y compartía la amistad en la mesa.",
+                "Abierto a la trascendencia y enraizado en ella, con una orientación radical hacia Dios, a quien llama ABBA.",
+                "Para-los-demás, sencillo y servicial, con una grandeza extraordinaria de espíritu y una entrega total.",
+                "Que sanaba enfermos y resucitaba muertos, demostrando su poder sobre las leyes naturales y la enfermedad.",
+                "Que se apartaba de las multitudes para orar en lugares solitarios, buscando la soledad y el silencio constante."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Qué significa que Jesús fuera un hombre 'abierto a la trascendencia y enraizado en ella'?",
+            options: [
+                "Que tenía una orientación radical hacia Dios, sintiendo el gozo de la filiación divina como garantía de su misión.",
+                "Que se dedicaba a sanar enfermos y resucitar muertos, demostrando su poder sobre las leyes de la naturaleza.",
+                "Que se apartaba de las multitudes para orar en lugares solitarios, buscando la soledad y el silencio constante.",
+                "Que anunciaba con dichos y hechos el mandato del amor, transformando la ley judía para dar primacía a la persona.",
+                "Que acogía a los pecadores y comía con ellos, mostrando cercanía a los pobres y transformando la ley judía.",
+                "Que era un hombre auténtico y abierto a la verdad, profundamente humano y muy exigente con los principios éticos.",
+                "Que amaba intensamente la vida y no soportaba el dolor de la gente, alegrándose en las fiestas y comidas.",
+                "Que tenía un liderazgo impresionante, arrastrando a las masas y atrayendo a muchos seguidores y discípulos."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Cuál fue una de las acciones de Jesús que más llamaba la atención de la gente y lo hacía digno de seguir?",
+            options: [
+                "Acogía a los pecadores y comía con ellos, mostrando cercanía a los pobres y transformando la ley judía.",
+                "Exigía a sus seguidores el cumplimiento estricto de las leyes de pureza para poder entrar al templo.",
+                "Se enfrentaba violentamente a las autoridades romanas para liberar al pueblo de la opresión imperial.",
+                "Realizaba milagros solo en privado, pidiendo a los beneficiados que no contaran a nadie lo sucedido.",
+                "Predicaba exclusivamente en las sinagogas, evitando el contacto con los marginados y pecadores públicos.",
+                "Se apartaba a lugares desiertos para ayunar durante cuarenta días, preparándose para su ministerio profético.",
+                "Enseñaba a sus discípulos a odiar a los enemigos y a buscar la venganza contra los opresores romanos.",
+                "Buscaba el apoyo de los recaudadores de impuestos para financiar su movimiento religioso y político."
+            ],
+            correct: 0
+        },
+
+        // TEMA 3: Proyecto de Dios para el hombre
+        {
+            question: "Según la conceptualización, ¿qué es lo que Dios ofrece al ser humano a través de su proyecto?",
+            options: [
+                "La felicidad, entendida como vida plena, la cual se conoce con el nombre de salvación.",
+                "La riqueza material y el éxito terrenal, como recompensa por cumplir sus mandamientos.",
+                "La liberación política del pueblo judío frente al dominio del Imperio Romano.",
+                "La sabiduría intelectual para comprender todos los misterios de la creación.",
+                "La ausencia total de sufrimiento y dolor en la vida terrenal, como premio a la fe.",
+                "La posibilidad de vivir como hijos de Dios, cumpliendo sus mandamientos y leyendo la biblia.",
+                "La unión con Dios, recibiendo su amor y amándolo de la misma manera que Él nos ama.",
+                "La fraternidad, que implica ayudarse, respetarse, amarse y poner en práctica la justicia y la paz."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Qué característica de la salvación se refiere a vivir como hijos de Dios?",
+            options: [
+                "La filiación, que implica cumplir mandamientos, leer la biblia, orar y tener a Jesucristo como modelo.",
+                "La fraternidad, que implica ayudarse, respetarse, amarse y poner en práctica la justicia y la paz.",
+                "La unión con Dios, que consiste en recibir su amor y amarlo de la misma manera que Él nos ama.",
+                "La libertad o señorío, que consiste en cuidar, proteger y sembrar la naturaleza creada por Dios.",
+                "La ausencia de sufrimiento y dolor, que se alcanza tras una vida de entrega y servicio a los demás.",
+                "La esperanza, que consiste en confiar en que todo saldrá bien y en creer en lo que no se ve.",
+                "La caridad, que implica dar limosna a los pobres y compartir los bienes materiales con los necesitados.",
+                "La obediencia, que implica aceptar la voluntad de Dios incluso cuando no se entiende completamente."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Cómo se define la 'historia de la salvación' en el texto?",
+            options: [
+                "Un conjunto de acontecimientos por los cuales Dios se ha revelado a la humanidad ofreciendo la salvación.",
+                "Una serie de normas y leyes que el pueblo judío debía cumplir para poder ser salvado por Dios.",
+                "El relato histórico de la vida de Jesús desde su nacimiento hasta su resurrección y ascensión.",
+                "La lista de los profetas que anunciaron la llegada del mesías y la fundación de la iglesia.",
+                "El conjunto de escritos del antiguo testamento que narran la creación del mundo y el diluvio.",
+                "La sucesión de papas y concilios que han definido los dogmas de fe a lo largo de los siglos.",
+                "El plan divino para la humanidad, que se cumplió exclusivamente en el pueblo de Israel.",
+                "La crónica de los milagros y prodigios realizados por los santos a lo largo de la historia."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Qué significa la característica de 'fraternidad' dentro del proyecto de Dios?",
+            options: [
+                "Que todos vivamos como hermanos, ayudándonos, respetándonos, amándonos y practicando la justicia y la paz.",
+                "Que todos vivamos como hijos de Dios, cumpliendo sus mandamientos, leyendo la biblia y orando.",
+                "Que todos cuidemos y protejamos la naturaleza, sembrando y administrando los recursos de la creación.",
+                "Que recibamos el amor de Dios y lo amemos de la misma manera, buscando la unión espiritual con Él.",
+                "Que todos alcancemos la ausencia total de sufrimiento y dolor, viviendo en una felicidad plena.",
+                "Que todos tengamos libertad para decidir nuestro propio destino, sin la intervención de Dios.",
+                "Que todos podamos acceder a la educación religiosa y a la lectura de las escrituras sagradas.",
+                "Que todos participemos activamente en la liturgia y en los sacramentos de la iglesia católica."
+            ],
+            correct: 0
+        },
+
+        // TEMA 4: Día mariano
+        {
+            question: "¿Qué virtud de la Virgen María nos enseña que la verdadera grandeza está en servir con sencillez?",
+            options: [
+                "La humildad, que la llevó a ser una persona sencilla y modesta, sin creerse superior a los demás.",
+                "La obediencia, que la llevó a aceptar la voluntad de Dios incluso cuando no entendía lo que sucedía.",
+                "La fortaleza, que la llevó a enfrentar los desafíos con valentía y a no perder la esperanza en la cruz.",
+                "El servicio, que la llevó a estar siempre dispuesta a ayudar a los demás y a preocuparse por sus necesidades.",
+                "La fe, que la hacía creer en Dios con todo su corazón incluso en los momentos más difíciles de su vida.",
+                "El amor, que le permitía amar a Jesús con un amor incondicional, con paciencia, comprensión y entrega.",
+                "La pureza, que la llevó a consagrarse a Dios desde su infancia y a mantenerse fiel a sus promesas.",
+                "La caridad, que la impulsaba a dar limosna a los pobres y a compartir sus bienes con los necesitados."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿A quién se le atribuye ser el primero en llamar a la Virgen María con el título de 'Auxiliadora'?",
+            options: [
+                "A San Juan Crisóstomo, en Constantinopla en el año 345, quien dijo: 'Tú, María, eres auxilio potentísimo de Dios'.",
+                "A San Juan Damasceno, en el año 749, quien propagó la jaculatoria 'María Auxiliadora, rogad por nosotros'.",
+                "A San Pío V, en el año 1572, quien ordenó rezar la advocación en las letanías de todo el mundo católico.",
+                "A San Juan Bosco, en 1860, a quien la Virgen se le apareció pidiéndole que le construyera un templo en Turín.",
+                "A San Sabas, en el año 532, quien narró que en oriente había una imagen llamada 'Auxiliadora de los enfermos'.",
+                "Al Papa Pío VII, en 1814, quien prometió declarar la fiesta si llegaba libre a Roma tras su destierro.",
+                "A San Pío X, en 1904, quien ordenó que se rezara la jaculatoria en todas las parroquias del mundo.",
+                "A Santo Domingo de Guzmán, en 1216, quien fundó la orden de predicadores bajo la protección de María."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Qué virtud de María se refleja cuando visitó a su prima Isabel cuando más la necesitaba?",
+            options: [
+                "El servicio, que la llevaba a estar dispuesta a ayudar a los demás y preocuparse por sus necesidades.",
+                "La fe, que la hacía creer en Dios con todo su corazón incluso en los momentos más difíciles de su vida.",
+                "El amor, que le permitía amar a Jesús con un amor incondicional, con paciencia, comprensión y entrega.",
+                "La humildad, que la mantenía como una persona sencilla y modesta a pesar de haber sido elegida por Dios.",
+                "La obediencia, que la llevaba a aceptar la voluntad de Dios incluso cuando no entendía lo que sucedía.",
+                "La fortaleza, que la llevaba a enfrentar los desafíos con valentía y a no perder la esperanza en la cruz.",
+                "La pureza, que la llevó a consagrarse a Dios desde su infancia y a mantenerse fiel a sus promesas.",
+                "La caridad, que la impulsaba a dar limosna a los pobres y a compartir sus bienes con los necesitados."
+            ],
+            correct: 0
+        },
+        {
+            question: "¿Qué hecho histórico llevó a que el 24 de mayo se declarara como el día de María Auxiliadora?",
+            options: [
+                "El Papa Pío VII prometió declarar la fiesta si llegaba libre a Roma, y lo logró inesperadamente el 24 de mayo de 1814.",
+                "San Juan Bosco terminó la construcción de la Basílica de María Auxiliadora en Turín el 24 de mayo de 1868.",
+                "La batalla de Lepanto se libró el 24 de mayo de 1571, donde la Virgen protegió a la cristiandad de los turcos.",
+                "La Virgen se apareció a San Juan Bosco el 24 de mayo de 1860, pidiéndole que le construyera un templo en Turín.",
+                "El Papa San Pío V ordenó rezar la advocación en las letanías el 24 de mayo de 1572, tras la victoria en Lepanto.",
+                "Los católicos del sur de Alemania hicieron una promesa a la Virgen el 24 de mayo de 1600 para terminar la guerra.",
+                "San Juan Damasceno propagó la jaculatoria 'María Auxiliadora' el 24 de mayo de 749 en Constantinopla.",
+                "San Juan Crisóstomo proclamó a María como 'Auxilio potentísimo de Dios' el 24 de mayo del año 345."
+            ],
+            correct: 0
+        }
+    ];
+
+    // Variables del juego
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let failures = 0;
+    let canAnswer = true;
+
+    // Elementos del DOM
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const questionCounter = document.getElementById('question-counter');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressBar = document.getElementById('progress-bar');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedback = document.getElementById('feedback');
+    const btnNext = document.getElementById('btn-next');
+    const resultIcon = document.getElementById('result-icon');
+    const resultTitle = document.getElementById('result-title');
+    const resultScore = document.getElementById('result-score');
+    const resultMessage = document.getElementById('result-message');
+
+    // Función para mezclar un array (Fisher-Yates)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Iniciar el Quiz
+    function startQuiz() {
+        // Seleccionar 10 preguntas aleatorias del banco de 16
+        currentQuestions = shuffleArray([...questionBank]).slice(0, 10);
+        
+        // Mezclar las 8 opciones de cada pregunta seleccionada
+        currentQuestions = currentQuestions.map(q => {
+            const shuffledOptions = shuffleArray([...q.options]);
+            const correctAnswerText = q.options[q.correct];
+            const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
+            return {
+                question: q.question,
+                options: shuffledOptions,
+                correct: newCorrectIndex
+            };
+        });
+
+        currentQuestionIndex = 0;
+        score = 0;
+        failures = 0;
+        
+        startScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        loadQuestion();
+    }
+
+    // Cargar la pregunta actual
+    function loadQuestion() {
+        canAnswer = true;
+        feedback.classList.remove('show', 'success', 'error');
+        btnNext.classList.remove('show');
+        
+        const q = currentQuestions[currentQuestionIndex];
+        
+        // Actualizar encabezado y progreso
+        questionCounter.textContent = `Pregunta ${currentQuestionIndex + 1} de 10`;
+        scoreDisplay.textContent = `Aciertos: ${score} | Fallos: ${failures}`;
+        progressBar.style.width = `${((currentQuestionIndex) / 10) * 100}%`;
+        
+        // Cargar texto de la pregunta
+        questionText.textContent = q.question;
+        
+        // Cargar opciones
+        optionsContainer.innerHTML = '';
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        
+        q.options.forEach((option, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('option');
+            optionDiv.innerHTML = `
+                <div class="option-letter">${letters[index]}</div>
+                <div>${option}</div>
+            `;
+            optionDiv.onclick = () => selectOption(index, optionDiv);
+            optionsContainer.appendChild(optionDiv);
+        });
+    }
+
+    // Seleccionar una opción
+    function selectOption(selectedIndex, optionElement) {
+        if (!canAnswer) return;
+        canAnswer = false;
+
+        const q = currentQuestions[currentQuestionIndex];
+        const allOptions = document.querySelectorAll('.option');
+        
+        // Deshabilitar clics en todas las opciones
+        allOptions.forEach(opt => opt.style.pointerEvents = 'none');
+
+        if (selectedIndex === q.correct) {
+            // Respuesta Correcta
+            optionElement.classList.add('correct');
+            score++;
+            feedback.textContent = "¡Correcto! Muy bien.";
+            feedback.className = "feedback show success";
+        } else {
+            // Respuesta Incorrecta
+            optionElement.classList.add('incorrect');
+            // Mostrar cuál era la correcta
+            allOptions[q.correct].classList.add('correct');
+            failures++;
+            feedback.textContent = "Incorrecto. La respuesta correcta está resaltada en verde.";
+            feedback.className = "feedback show error";
+        }
+
+        // Actualizar marcador
+        scoreDisplay.textContent = `Aciertos: ${score} | Fallos: ${failures}`;
+
+        // Verificar si perdió (2 fallos)
+        if (failures >= 2) {
+            setTimeout(() => endQuiz(false), 1500);
+            return;
+        }
+
+        // Mostrar botón de siguiente
+        btnNext.classList.add('show');
+        
+        // Si es la última pregunta, cambiar texto del botón
+        if (currentQuestionIndex === currentQuestions.length - 1) {
+            btnNext.textContent = "Ver Resultados";
+        }
+    }
+
+    // Siguiente pregunta
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            endQuiz(true);
+        }
+    }
+
+    // Finalizar el Quiz
+    function endQuiz(completed) {
+        quizScreen.classList.remove('active');
+        resultScreen.classList.add('active');
+        
+        if (!completed || failures >= 2) {
+            // Perdió
+            resultIcon.textContent = "😕";
+            resultTitle.textContent = "Lo siento, has perdido";
+            resultTitle.style.color = "var(--danger)";
+            resultScore.textContent = `Aciertos: ${score} | Fallos: ${failures}`;
+            resultMessage.textContent = "Has cometido 2 o más fallos. Recuerda que necesitas al menos 9 respuestas correctas para aprobar. ¡Estudia un poco más y vuelve a intentarlo!";
+        } else {
+            // Ganó
+            resultIcon.textContent = "🎉";
+            resultTitle.textContent = "¡Felicidades!";
+            resultTitle.style.color = "var(--success)";
+            resultScore.textContent = `Has acertado ${score} de 10 preguntas.`;
+            resultMessage.textContent = "Has demostrado un excelente conocimiento de los temas. ¡Sigue así!";
+        }
+    }
+</script>
+
+</body>
+</html>
